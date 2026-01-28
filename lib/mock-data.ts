@@ -1,5 +1,6 @@
 import type { ClassListItem } from "@/types/class";
 import type { TimeSlot } from "@/types/class";
+import type { ReservationListItem } from "@/types/reservation";
 
 export const mockClasses: ClassListItem[] = [
   {
@@ -196,5 +197,44 @@ export const mockTimeSlots: TimeSlot[] = [
     startTime: "09:00",
     maxCapacity: 8,
     currentBookings: 7,
+  },
+];
+
+export const mockReservations: ReservationListItem[] = [
+  {
+    id: "r1",
+    classId: "1",
+    className: "프랑스 가정식 요리 클래스",
+    timeSlotId: "ts1",
+    date: "2026-02-01",
+    startTime: "10:00",
+    guests: 2,
+    status: "CONFIRMED",
+    studioName: "르쿠진 스튜디오",
+    createdAt: "2026-01-20T09:00:00Z",
+  },
+  {
+    id: "r2",
+    classId: "3",
+    className: "수채화 풍경 드로잉",
+    timeSlotId: "ts6",
+    date: "2026-02-02",
+    startTime: "11:00",
+    guests: 1,
+    status: "PENDING",
+    studioName: "아트스튜디오",
+    createdAt: "2026-01-22T14:30:00Z",
+  },
+  {
+    id: "r3",
+    classId: "7",
+    className: "K-POP 댄스 클래스",
+    timeSlotId: "ts7",
+    date: "2026-02-05",
+    startTime: "19:00",
+    guests: 3,
+    status: "CONFIRMED",
+    studioName: "댄스팩토리",
+    createdAt: "2026-01-25T11:00:00Z",
   },
 ];

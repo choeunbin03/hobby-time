@@ -44,7 +44,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const days = ["일", "월", "화", "수", "목", "금", "토"];
-    return `${date.getMonth() + 1}월 ${date.getDate()}일 (${days[date.getDay()]})`;
+    return `${date.getMonth() + 1}월 ${date.getDate()}일(${days[date.getDay()]})`;
   };
 
   const handleGuestChange = (delta: number) => {
@@ -66,9 +66,11 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
             <CheckCircle2 className="h-8 w-8 text-success" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-foreground">예약이 완료되었습니다</h2>
+          <h2 className="mt-4 text-xl font-bold text-foreground">
+            예약이 완료되었습니다
+          </h2>
           <p className="mt-2 text-muted-foreground">
-            예약 내역은 내 예약 페이지에서 확인하실 수 있습니다.
+            예약 내역은 마이페이지에서 확인하실 수 있습니다.
           </p>
           <div className="mt-6 w-full space-y-2 rounded-lg bg-muted p-4 text-left text-sm">
             <div className="flex justify-between">
@@ -90,7 +92,6 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Class Summary */}
       <Card>
         <CardContent className="p-4">
           <h1 className="text-lg font-bold text-foreground">{classItem.name}</h1>
@@ -100,12 +101,11 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </CardContent>
       </Card>
 
-      {/* Time Slot Selection */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calendar className="h-5 w-5 text-primary" />
-            회차 선택
+            일정 선택
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -168,13 +168,14 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
 
           {timeSlots.length === 0 && (
             <div className="py-8 text-center">
-              <p className="text-muted-foreground">현재 예약 가능한 회차가 없습니다.</p>
+              <p className="text-muted-foreground">
+                현재 예약 가능한 일정이 없습니다.
+              </p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Guest Selection */}
       {selectedSlot && (
         <Card>
           <CardHeader>
@@ -188,7 +189,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
               <div>
                 <p className="font-medium text-foreground">예약 인원</p>
                 <p className="text-sm text-muted-foreground">
-                  최대 {availableSeats}명까지 예약 가능
+                  남은 좌석 {availableSeats}석
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -219,7 +220,6 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </Card>
       )}
 
-      {/* Price Summary & Book Button */}
       {selectedSlot && (
         <Card>
           <CardContent className="p-4">
@@ -240,12 +240,11 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </Card>
       )}
 
-      {/* Confirm Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>예약을 확정하시겠습니까?</DialogTitle>
-            <DialogDescription>아래 내용으로 예약이 진행됩니다.</DialogDescription>
+            <DialogTitle>예약을 확정할까요?</DialogTitle>
+            <DialogDescription>아래 내용을 확인해주세요.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 rounded-lg bg-muted p-4 text-sm">
             <div className="flex justify-between">
@@ -255,7 +254,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
             {selectedSlot && (
               <>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">일시</span>
+                  <span className="text-muted-foreground">일정</span>
                   <span className="text-foreground">
                     {formatDate(selectedSlot.date)} {selectedSlot.startTime}
                   </span>
@@ -265,7 +264,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
                   <span className="text-foreground">{guests}명</span>
                 </div>
                 <div className="flex justify-between border-t border-border pt-3">
-                  <span className="font-medium text-foreground">총 금액</span>
+                  <span className="font-medium text-foreground">총 결제</span>
                   <span className="font-bold text-foreground">
                     {totalPrice.toLocaleString()}원
                   </span>

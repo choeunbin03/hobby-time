@@ -1,16 +1,27 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, MapPin, Store } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Clock, MapPin, Sparkles, Store } from "lucide-react";
 import type { ClassListItem } from "@/types/class";
 
 interface ClassDetailContentProps {
   classItem: ClassListItem;
 }
 
-/** 클래스 상세 화면: 정보, 스튜디오, CTA */
 export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -75,21 +86,67 @@ export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
         </CardContent>
       </Card>
 
-      {/* CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-xl font-bold text-foreground sm:text-2xl">
-          {classItem.price.toLocaleString()}원
-          <span className="ml-1 text-sm text-muted-foreground">1인</span>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/">
-            <Button variant="outline">목록으로</Button>
-          </Link>
-          <Link href={`/classes/${classItem.id}/book`}>
-            <Button>예약하기</Button>
-          </Link>
+      <Card className="border-accent/30 bg-accent/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-5 w-5 text-accent" />
+            AI 요약
+            <Badge variant="outline" className="text-xs font-normal">
+              임시 제공
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {classItem.category}에 관심 있다면 {classItem.studio.location}의{" "}
+            {classItem.studio.name}에서 진행하는 {classItem.name} 클래스를 추천합니다.
+            약 {classItem.duration}분 동안 핵심 기초부터 실습까지 진행하며, 1인
+            기준 {classItem.price.toLocaleString()}원입니다.
+          </p>
+        </CardContent>
+      </Card>
+
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-card p-4 md:static md:border-0 md:bg-transparent md:p-0">
+        <div className="container mx-auto flex items-center justify-between gap-4 md:justify-end">
+          <div className="md:hidden">
+            <span className="text-xl font-bold text-foreground">
+              {classItem.price.toLocaleString()}
+            </span>
+            <span className="text-muted-foreground">원</span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowLoginDialog(true)}
+              className="flex-1 md:flex-none"
+            >
+              문의하기
+            </Button>
+            <Link href={`/classes/${classItem.id}/book`}>
+              <Button className="flex-1 md:flex-none">예약하기</Button>
+            </Link>
+          </div>
         </div>
       </div>
+
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>문의하기</DialogTitle>
+            <DialogDescription>
+              문의 기능은 준비 중입니다. 곧 안내드릴게요.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowLoginDialog(false)}>
+              닫기
+            </Button>
+            <Button>확인</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="h-20 md:hidden" />
     </div>
   );
 }
