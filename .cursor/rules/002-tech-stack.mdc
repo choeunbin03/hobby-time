@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+---
+description: 기술 스택, 코드 컨벤션, 파일 구조 및 네이밍 규칙을 정의합니다. (React, TypeScript, Tailwind, Supabase/SQL)
+globs: **/*.ts, **/*.tsx, **/*.js, **/*.json
+---
+
+# Tech Stack & Coding Standards
+
+## 1. Tech Stack
+- **Framework:** Next.js (App Router) or React (Vite).
+- **Language:** TypeScript (Strict Mode).
+- **Styling:** Tailwind CSS.
+- **State Management:** React Query (Server State), Zustand or Context API (Client State).
+- **Auth:** NextAuth.js or Custom OAuth Handler.
+
+## 2. TypeScript Rules
+- `any` 타입 사용 금지. 반드시 Interface나 Type을 정의할 것.
+- Props는 Interface로 정의하며, 컴포넌트 바로 위에 선언.
+- 데이터 모델(User, Class, Session 등)은 별도의 `types/` 폴더에서 중앙 관리.
+
+## 3. React/Next.js Best Practices
+- **Server vs Client:** 가능한 한 Server Components를 사용하여 데이터를 페칭하고, 상호작용이 필요한 부분만 Client Components(`'use client'`)로 분리.
+- **Component Structure:**
+  - `components/ui`: 재사용 가능한 기본 컴포넌트 (Button, Input 등).
+  - `components/features`: 특정 기능에 종속된 컴포넌트 (Timetable, ClassCard 등).
+- **Naming:**
+  - Components: PascalCase (e.g., `ClassCard.tsx`)
+  - Functions/Variables: camelCase
+  - Constants: SCREAMING_SNAKE_CASE
+
+## 4. Tailwind CSS Rules
+- 유틸리티 클래스 우선 사용. 복잡한 스타일은 `@apply` 보다는 컴포넌트 분리를 권장.
+- 색상, 폰트 사이즈 등은 `tailwind.config.js`의 theme을 활용.
+- 모바일 대응을 위해 `sm:`, `md:`, `lg:` prefix를 적극 활용.
+
+## 5. API & Data Fetching
+- API 호출 함수는 `services/` 또는 `api/` 폴더에 분리.
+- 에러 처리(Try-Catch)를 필수적으로 구현하고, 사용자에게 에러 메시지를 UI로 표시.

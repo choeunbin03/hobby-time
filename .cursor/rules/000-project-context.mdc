@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+---
+
+---
+description: 프로젝트 핵심 기획(PRD), 데이터 모델, 비즈니스 로직 및 Phase 1(MVP) 범위를 정의합니다. 모든 코드 작성 시 이 규칙을 최우선으로 참조하십시오.
+globs: **/*
+---
+
+# HobbyTime Project Context & Business Logic
+
+## 1. Project Vision
+HobbyTime은 지역/카테고리 기반으로 취미 클래스를 탐색하고, 타임테이블에서 회차를 선택해 예약하는 서비스입니다.
+
+## 2. Development Phase Scope (Strictly Enforced)
+현재 개발 단계는 **Phase 1 (MVP)**입니다. Phase 2 기능은 절대 구현하지 마십시오.
+
+### ✅ Phase 1 (구현 대상)
+- **인증:** Google Social Login, 비로그인 탐색 허용.
+- **탐색:** 메인 목록(필터/정렬), 클래스 상세(정보/스튜디오).
+- **예약:** 타임테이블(회차) 조회 -> 인원 선택 -> **즉시 확정(CONFIRMED)**.
+- **마이페이지:** 내 예약 목록 조회.
+- **AI:** 단순 텍스트 입력 -> 요약 결과 DB 저장 (실시간 추천 X).
+
+### ❌ Phase 2 (구현 금지 - 추후 예정)
+- 관리자(Admin) 기능, 예약 승인/거절(PENDING 상태), 후기(Review) 작성, 결제(Payment) 시스템.
+
+## 3. Data Model & Integrity
+데이터 모델링은 다음 원칙을 엄격히 준수해야 합니다.
+
+- **Classes (클래스):** 정적 정보 (이름, 설명, 가격). 예약의 주체가 아님.
+- **Sessions (회차):** 예약의 실제 대상. `date`, `start_time`, `max_capacity`, `current_count` 보유.
+- **Reservations (예약):** User와 Session의 연결.
+  - **Logic:** 예약 생성 시 반드시 `Session`의 잔여석(`max` - `current`)을 확인해야 함.
+  - **Transaction:** 예약 생성과 `Session.current_count` 증가는 하나의 트랜잭션으로 묶여야 함.
+- **Studios:** 클래스의 소유 주체.
+
+## 4. User Journey & Sequence
+1. **탐색:** User -> Main List -> Class Detail (비로그인 가능).
+2. **예약 진입:** '예약하기' 버튼 클릭 -> (비로그인 시) Login Modal -> Auth -> 타임테이블 진입.
+3. **예약 실행:** 회차 선택 -> 인원 선택 -> `POST /reservations`.
+4. **결과:** 성공 시 '내 예약' 페이지로 이동 또는 성공 메시지.
+
+## 5. AI Features (MVP)
+- 복잡한 RAG나 에이전트를 사용하지 않음.
+- User Input -> AI API -> Response -> `AiLogs` Table 저장 -> UI 표시의 단순 파이프라인만 구축.

@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+---
+description: UI/UX 디자인 시스템, 페이지 구조 및 컴포넌트 스타일링 규칙을 정의합니다. 프론트엔드 작업 시 필수 참조.
+globs: apps/web/**/*, **/*.tsx, **/*.jsx, **/*.css
+---
+
+# HobbyTime UI/UX Design System
+
+## 1. Page Structure (Flowchart Based)
+`FLOW.md`에 정의된 구조를 따릅니다.
+
+- **Layout:**
+  - `Common Header`: 로고, 네비게이션, 로그인/마이페이지 버튼.
+  - `Main Content`: 페이지별 콘텐츠.
+  - `Footer`: 정보 및 링크.
+
+- **Key Pages:**
+  1. **Landing (Home):** 필터(지역/카테고리) + 클래스 카드 리스트(Grid Layout).
+  2. **Class Detail:** 상단 이미지, 클래스 정보, 하단 스튜디오 정보, **Sticky Booking CTA**.
+  3. **Timetable (Booking):** 날짜 선택(Calendar/List) -> 시간대 선택(Chips/List) -> 인원 선택(Counter).
+  4. **My Reservations:** 예약 카드 리스트 (상태 뱃지 포함).
+
+## 2. Design Principles
+- **Style:** Clean, Minimal, Trustworthy.
+- **Responsiveness:** Mobile-First 접근 방식. 모든 페이지는 모바일에서 완벽하게 동작해야 함.
+- **Visual Feedback:**
+  - 로딩 상태: Skeleton UI 사용.
+  - 예약 성공/실패: Toast Message 또는 Modal 사용.
+
+## 3. Component Guidelines
+- **Class Card:** 썸네일, 제목, 카테고리, 가격, 위치 포함.
+- **Timetable:** '매진'된 회차는 비활성화(Dimmed) 처리 및 선택 불가.
+- **Buttons:**
+  - `Primary`: 예약, 확정, 로그인 (눈에 띄는 브랜드 컬러).
+  - `Secondary`: 취소, 상세 보기.
+
+## 4. UX Logic
+- **Login Trigger:** 비로그인 사용자가 '예약하기' 버튼 클릭 시, 페이지 이동 없이 **로그인 모달** 또는 리다이렉트 처리 후 **원래 보고 있던 클래스 페이지**로 복귀해야 함.

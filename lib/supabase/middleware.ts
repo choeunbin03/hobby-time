@@ -1,0 +1,2 @@
+// Supabase middleware helper
+export {};

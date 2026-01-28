@@ -1,0 +1,2 @@
+// AI client config
+export {};

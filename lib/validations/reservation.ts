@@ -1,0 +1,2 @@
+// Reservation validation (Zod)
+export {};

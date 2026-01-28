@@ -1,0 +1,2 @@
+// Session validation (Zod)
+export {};

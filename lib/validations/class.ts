@@ -1,0 +1,2 @@
+// Class validation (Zod)
+export {};
