@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ClassDetailContent } from "@/components/posts/ClassDetailContent";
-import { mockClasses } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+
+import { ClassDetail } from "@/types/class";
 
 interface ClassDetailPageProps {
   params: Promise<{ id: string }>;
@@ -11,11 +13,28 @@ interface ClassDetailPageProps {
 
 export default async function ClassDetailPage({ params }: ClassDetailPageProps) {
   const { id } = await params;
-  const classItem = mockClasses.find((item) => item.id === id);
+  const supabase = await createClient();
 
-  if (!classItem) {
+  // Validate UUID format to prevent database errors
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
     notFound();
   }
+
+  const { data, error } = await supabase
+    .from("classes")
+    .select("*, studios(*)")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    if (error?.code !== 'PGRST116') { // PGRST116 is "The result contains 0 rows"
+        console.error("Error fetching class detail:", error);
+    }
+    notFound();
+  }
+
+  const classItem = data as unknown as ClassDetail;
 
   return (
     <main className="container mx-auto px-4 py-6">
