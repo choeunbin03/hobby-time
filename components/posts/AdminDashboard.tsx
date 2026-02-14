@@ -163,8 +163,8 @@ export function AdminDashboard({ defaultTab = "classes" }: AdminDashboardProps) 
                   </div>
                   <div className="mt-1 flex gap-4 text-sm text-muted-foreground">
                     <span>{cls.price.toLocaleString()}원</span>
-                    <span>{cls.duration}분</span>
-                    <span>{cls.studio.location}</span>
+                    <span>{cls.duration_minutes}분</span>
+                    <span>{cls.studios?.location_text}</span>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon">

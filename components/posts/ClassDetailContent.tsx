@@ -13,10 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Clock, MapPin, Sparkles, Store } from "lucide-react";
-import type { ClassListItem } from "@/types/class";
+import type { ClassDetail } from "@/types/class";
 
 interface ClassDetailContentProps {
-  classItem: ClassListItem;
+  classItem: ClassDetail;
 }
 
 export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
@@ -39,11 +39,11 @@ export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
               <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  {classItem.duration}분
+                  {classItem.duration_minutes}분
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  {classItem.studio.location}
+                  {classItem.studios?.location_text}
                 </div>
               </div>
             </div>
@@ -74,14 +74,14 @@ export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
         <CardContent className="space-y-3">
           <div>
             <p className="font-medium text-foreground">
-              {classItem.studio.name}
+              {classItem.studios?.name}
             </p>
             <p className="text-sm text-muted-foreground">
-              {classItem.studio.location}
+              {classItem.studios?.location_text}
             </p>
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {classItem.studio.description}
+            {classItem.studios?.description || '스튜디오 소개가 없습니다.'}
           </p>
         </CardContent>
       </Card>
@@ -98,9 +98,9 @@ export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {classItem.category}에 관심 있다면 {classItem.studio.location}의{" "}
-            {classItem.studio.name}에서 진행하는 {classItem.name} 클래스를 추천합니다.
-            약 {classItem.duration}분 동안 핵심 기초부터 실습까지 진행하며, 1인
+            {classItem.category}에 관심 있다면 {classItem.studios?.location_text}의{" "}
+            {classItem.studios?.name}에서 진행하는 {classItem.name} 클래스를 추천합니다.
+            약 {classItem.duration_minutes}분 동안 핵심 기초부터 실습까지 진행하며, 1인
             기준 {classItem.price.toLocaleString()}원입니다.
           </p>
         </CardContent>

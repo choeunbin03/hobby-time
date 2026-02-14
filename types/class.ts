@@ -1,28 +1,17 @@
-// Class domain types
-export interface Class {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  price: number;
-  durationMinutes: number;
-  studioId: string;
+import { Database } from './database';
+
+export type Class = Database['public']['Tables']['classes']['Row'];
+export type Studio = Database['public']['Tables']['studios']['Row'];
+export type Session = Database['public']['Tables']['class_sessions']['Row'];
+
+// Join Type for Class List
+export interface ClassWithStudio extends Class {
+  studios: Pick<Studio, 'name' | 'location_text' | 'region_code'> | null;
 }
 
-/** Main page list item: class with studio embedded (for cards/filters) */
-export interface ClassListItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  duration: number;
-  category: string;
-  studio: {
-    id: string;
-    name: string;
-    location: string;
-    description: string;
-  };
+// Join Type for Class Detail
+export interface ClassDetail extends Class {
+  studios: Studio | null;
 }
 
 export interface TimeSlot {
@@ -33,3 +22,5 @@ export interface TimeSlot {
   maxCapacity: number;
   currentBookings: number;
 }
+
+export type ClassListItem = ClassWithStudio;

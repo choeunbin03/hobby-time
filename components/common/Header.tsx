@@ -3,16 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Calendar, Home, User } from "lucide-react";
+import { Calendar, Home } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { User } from "@supabase/supabase-js";
+import { LoginButton } from "@/components/auth/LoginButton";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 // PRD Phase 1 기준 메뉴 구성: 클래스 탐색, 내 예약
 const navItems = [
   { href: "/", label: "클래스 탐색", icon: Home },
-  { href: "/my-reservations", label: "내 예약", icon: Calendar },
+  { href: "/my/reservations", label: "내 예약", icon: Calendar },
 ];
 
-export function Header() {
+interface HeaderProps {
+  user: User | null;
+}
+
+export function Header({ user }: HeaderProps) {
   const pathname = usePathname();
 
   return (
@@ -26,6 +33,11 @@ export function Header() {
             Hobby Time
           </span>
         </Link>
+
+        {/* Mobile Navigation */}
+        <nav className="flex items-center gap-1 md:hidden">
+             {user ? <UserMenu user={user} /> : <LoginButton />}
+        </nav>
 
         <nav className="hidden items-center gap-0.5 md:flex">
           {navItems.map((item) => {
@@ -51,19 +63,14 @@ export function Header() {
           })}
         </nav>
 
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden">
-            <User className="h-4 w-4" />
-          </Button>
-          <Button size="sm" className="hidden md:flex h-8 text-xs font-medium px-4">
-            <User className="mr-1.5 h-3.5 w-3.5" />
-            로그인
-          </Button>
+        <div className="hidden md:flex items-center gap-1">
+          {user ? <UserMenu user={user} /> : <LoginButton />}
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      <nav className="flex border-t border-border/50 bg-card/50 md:hidden">
+       {/* Mobile Bottom Navigation (Optional - keeping existing pattern if desired, but maybe bottom nav is better for mobile) */}
+       {/* Re-using the existing mobile bottom nav style */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-border/50 bg-background/80 backdrop-blur-md md:hidden pb-safe">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -72,7 +79,7 @@ export function Header() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+                "flex flex-1 flex-col items-center justify-center gap-0.5 py-3 text-[10px] font-medium transition-colors",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
