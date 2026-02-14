@@ -96,7 +96,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         <CardContent className="p-4">
           <h1 className="text-lg font-bold text-foreground">{classItem.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {classItem.studio.name} · {classItem.studio.location}
+            {classItem.studios?.name} · {classItem.studios?.location_text}
           </p>
         </CardContent>
       </Card>

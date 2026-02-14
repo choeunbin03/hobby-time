@@ -9,15 +9,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "프랑스 가정에서 즐기는 따뜻한 요리를 배워보세요. 크로크무슈, 라따뚜이 등 정통 프랑스 요리를 직접 만들어봅니다.",
     price: 65000,
-    duration: 120,
+    duration_minutes: 120,
     category: "요리",
-    studio: {
-      id: "s1",
+    studio_id: "s1",
+    studios: {
       name: "르 쿠진 스튜디오",
-      location: "서울 강남",
-      description:
-        "프랑스 출신 셰프가 운영하는 요리 스튜디오입니다. 10년 이상의 경력을 바탕으로 진정한 프랑스 요리를 알려드립니다.",
+      location_text: "서울 강남",
+      region_code: "SEOUL",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "2",
@@ -25,15 +28,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "손으로 직접 빚어 만드는 도자기 클래스입니다. 나만의 머그컵이나 화병을 만들어보세요.",
     price: 55000,
-    duration: 180,
+    duration_minutes: 180,
     category: "공예",
-    studio: {
-      id: "s2",
+    studio_id: "s2",
+    studios: {
       name: "흙과 불 공방",
-      location: "서울 성수",
-      description:
-        "전통 도자기 기법을 현대적으로 재해석한 공방입니다. 초보자도 쉽게 배울 수 있습니다.",
+      location_text: "경기 수원",
+      region_code: "GYEONGGI",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "3",
@@ -41,15 +47,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "수채화의 기본부터 풍경화까지 배워봅니다. 물의 흐름을 이용한 아름다운 표현법을 익혀보세요.",
     price: 45000,
-    duration: 150,
+    duration_minutes: 150,
     category: "미술",
-    studio: {
-      id: "s3",
+    studio_id: "s3",
+    studios: {
       name: "아트플로우 스튜디오",
-      location: "서울 홍대",
-      description:
-        "현직 아티스트들이 운영하는 미술 스튜디오입니다. 다양한 미술 클래스를 제공합니다.",
+      location_text: "서울 홍대",
+      region_code: "SEOUL",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "4",
@@ -57,15 +66,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "기타를 처음 접하는 분들을 위한 입문 클래스입니다. 기본 코드부터 간단한 곡 연주까지 배워봅니다.",
     price: 40000,
-    duration: 90,
+    duration_minutes: 90,
     category: "음악",
-    studio: {
-      id: "s4",
+    studio_id: "s4",
+    studios: {
       name: "사운드웨이브 뮤직",
-      location: "서울 홍대",
-      description:
-        "현직 뮤지션들이 운영하는 음악 스튜디오입니다. 다양한 악기 클래스를 제공합니다.",
+      location_text: "서울 홍대",
+      region_code: "SEOUL",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "5",
@@ -73,15 +85,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "코어 강화와 유연성 향상을 위한 필라테스 기초 클래스입니다. 올바른 자세와 호흡법을 배워봅니다.",
     price: 35000,
-    duration: 60,
+    duration_minutes: 60,
     category: "운동",
-    studio: {
-      id: "s5",
+    studio_id: "s5",
+    studios: {
       name: "바디밸런스 스튜디오",
-      location: "서울 강남",
-      description:
-        "전문 강사진이 운영하는 필라테스 스튜디오입니다. 소수 정예로 진행됩니다.",
+      location_text: "서울 강남",
+      region_code: "SEOUL",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "6",
@@ -89,15 +104,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "DSLR 카메라의 기본 조작법부터 구도까지 배워봅니다. 야외 촬영 실습도 함께 진행합니다.",
     price: 60000,
-    duration: 180,
+    duration_minutes: 180,
     category: "사진",
-    studio: {
-      id: "s6",
+    studio_id: "s6",
+    studios: {
       name: "렌즈스토리",
-      location: "서울 성수",
-      description:
-        "프로 사진작가가 운영하는 사진 스튜디오입니다. 다양한 사진 클래스를 제공합니다.",
+      location_text: "인천 송도",
+      region_code: "INCHEON",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "7",
@@ -105,15 +123,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "인기 K-POP 안무를 배워봅니다. 처음이셔도 걱정 마세요! 기초부터 차근차근 알려드립니다.",
     price: 30000,
-    duration: 90,
+    duration_minutes: 90,
     category: "댄스",
-    studio: {
-      id: "s7",
+    studio_id: "s7",
+    studios: {
       name: "댄스팩토리",
-      location: "서울 홍대",
-      description:
-        "현직 댄서들이 운영하는 댄스 스튜디오입니다. 다양한 장르의 댄스 클래스를 제공합니다.",
+      location_text: "부산 서면",
+      region_code: "BUSAN",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
   {
     id: "8",
@@ -121,15 +142,18 @@ export const mockClasses: ClassListItem[] = [
     description:
       "정통 이탈리안 파스타를 직접 만들어봅니다. 면 반죽부터 소스까지 전 과정을 배워봅니다.",
     price: 70000,
-    duration: 150,
+    duration_minutes: 150,
     category: "요리",
-    studio: {
-      id: "s8",
+    studio_id: "s8",
+    studios: {
       name: "파스타 아틀리에",
-      location: "서울 잠실",
-      description:
-        "이탈리아에서 수련한 셰프가 운영하는 요리 스튜디오입니다.",
+      location_text: "제주 애월",
+      region_code: "JEJU",
     },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    cover_image_path: null,
+    is_published: true,
   },
 ];
 
