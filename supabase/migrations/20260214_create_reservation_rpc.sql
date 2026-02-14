@@ -65,4 +65,4 @@ begin
 
   return v_reservation_id;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer;
