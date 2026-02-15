@@ -24,3 +24,16 @@ export interface TimeSlot {
 }
 
 export type ClassListItem = ClassWithStudio;
+
+export type Reservation = Database['public']['Tables']['reservations']['Row'];
+
+// Join Type for My Reservations
+// The query will look like:
+// .select('*, class_sessions(*, classes(*, studios(*)))')
+export interface ReservationWithDetails extends Reservation {
+  class_sessions: (Session & {
+    classes: (Class & {
+      studios: Studio | null;
+    }) | null;
+  }) | null;
+}

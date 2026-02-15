@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,87 +12,77 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Minus, Plus, Users, CheckCircle2 } from "lucide-react";
-import type { ClassListItem, TimeSlot } from "@/types/class";
+import { Calendar, Clock, Minus, Plus, Users, AlertCircle } from "lucide-react";
+import type { ClassDetail, Session } from "@/types/class";
 import { cn } from "@/lib/utils/cn";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+import { reserveClass } from "@/app/actions/booking";
+import { toast } from "sonner";
 
 interface BookingContentProps {
-  classItem: ClassListItem;
-  timeSlots: TimeSlot[];
+  classItem: ClassDetail;
+  sessions: Session[];
 }
 
-export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+export function BookingContent({ classItem, sessions }: BookingContentProps) {
+  const router = useRouter();
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [guests, setGuests] = useState(1);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [isBooked, setIsBooked] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const slotsByDate = useMemo(
-    () =>
-      timeSlots.reduce((acc, slot) => {
-        if (!acc[slot.date]) acc[slot.date] = [];
-        acc[slot.date].push(slot);
-        return acc;
-      }, {} as Record<string, TimeSlot[]>),
-    [timeSlots]
-  );
+  // Group sessions by Date (YYYY-MM-DD)
+  const sessionsByDate = useMemo(() => {
+    return sessions.reduce((acc, session) => {
+      const dateKey = format(new Date(session.start_at), "yyyy-MM-dd");
+      if (!acc[dateKey]) acc[dateKey] = [];
+      acc[dateKey].push(session);
+      return acc;
+    }, {} as Record<string, Session[]>);
+  }, [sessions]);
 
-  const availableSeats =
-    selectedSlot?.maxCapacity && selectedSlot?.currentBookings !== undefined
-      ? selectedSlot.maxCapacity - selectedSlot.currentBookings
-      : 0;
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const days = ["일", "월", "화", "수", "목", "금", "토"];
-    return `${date.getMonth() + 1}월 ${date.getDate()}일(${days[date.getDay()]})`;
-  };
+  const availableSeats = selectedSession
+    ? selectedSession.capacity - selectedSession.booked_count
+    : 0;
 
   const handleGuestChange = (delta: number) => {
     const next = guests + delta;
     if (next >= 1 && next <= availableSeats) setGuests(next);
   };
 
-  const handleBook = () => {
-    setShowConfirmDialog(false);
-    setIsBooked(true);
+  const handleBook = async () => {
+    if (!selectedSession) return;
+
+    if (guests > availableSeats) {
+        toast.error("선택한 인원이 잔여석을 초과했습니다.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("classId", classItem.id);
+    formData.append("sessionId", selectedSession.id);
+    formData.append("headCount", guests.toString());
+
+    startTransition(async () => {
+        const result = await reserveClass(null, formData);
+        
+        if (result?.success) {
+            toast.success(result.message);
+            setShowConfirmDialog(false);
+            router.push("/my/reservations");
+        } else if (result?.message) {
+            toast.error(result.message);
+            setShowConfirmDialog(false);
+        }
+    });
   };
 
   const totalPrice = classItem.price * guests;
 
-  if (isBooked) {
-    return (
-      <Card className="mx-auto max-w-md">
-        <CardContent className="flex flex-col items-center py-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-            <CheckCircle2 className="h-8 w-8 text-success" />
-          </div>
-          <h2 className="mt-4 text-xl font-bold text-foreground">
-            예약이 완료되었습니다
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            예약 내역은 마이페이지에서 확인하실 수 있습니다.
-          </p>
-          <div className="mt-6 w-full space-y-2 rounded-lg bg-muted p-4 text-left text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">클래스</span>
-              <span className="font-medium text-foreground">{classItem.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">상태</span>
-              <Badge className="bg-success text-success-foreground">CONFIRMED</Badge>
-            </div>
-          </div>
-          <Button className="mt-6 w-full" asChild>
-            <a href="/my-reservations">내 예약 확인하기</a>
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {/* Class Info Summary */}
       <Card>
         <CardContent className="p-4">
           <h1 className="text-lg font-bold text-foreground">{classItem.name}</h1>
@@ -101,6 +92,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </CardContent>
       </Card>
 
+      {/* Session Selection */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -109,21 +101,25 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Object.entries(slotsByDate).map(([date, slots]) => (
-            <div key={date}>
-              <h3 className="mb-3 font-medium text-foreground">{formatDate(date)}</h3>
+          {Object.entries(sessionsByDate).map(([dateKey, dailySessions]) => (
+            <div key={dateKey}>
+              <h3 className="mb-3 font-medium text-foreground">
+                {format(new Date(dateKey), "PPP (EEE)", { locale: ko })}
+              </h3>
               <div className="space-y-2">
-                {slots.map((slot) => {
-                  const remaining = slot.maxCapacity - slot.currentBookings;
-                  const isSoldOut = remaining === 0;
-                  const isSelected = selectedSlot?.id === slot.id;
+                {dailySessions.map((session) => {
+                  const startDate = new Date(session.start_at);
+                  const remaining = session.capacity - session.booked_count;
+                  const isSoldOut = remaining <= 0;
+                  const isSelected = selectedSession?.id === session.id;
+                  
                   return (
                     <button
                       type="button"
-                      key={slot.id}
+                      key={session.id}
                       onClick={() => {
                         if (!isSoldOut) {
-                          setSelectedSlot(slot);
+                          setSelectedSession(session);
                           setGuests(1);
                         }
                       }}
@@ -131,15 +127,15 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
                       className={cn(
                         "flex w-full items-center justify-between rounded-lg border p-4 transition-all",
                         isSelected
-                          ? "border-primary bg-primary/5"
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
                           : "border-border bg-card hover:border-primary/50",
-                        isSoldOut && "cursor-not-allowed opacity-50"
+                        isSoldOut && "cursor-not-allowed opacity-50 bg-muted"
                       )}
                     >
                       <div className="flex items-center gap-3">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium text-foreground">
-                          {slot.startTime}
+                          {format(startDate, "p", { locale: ko })}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -166,8 +162,8 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
             </div>
           ))}
 
-          {timeSlots.length === 0 && (
-            <div className="py-8 text-center">
+          {sessions.length === 0 && (
+            <div className="py-8 text-center bg-muted/30 rounded-lg border border-dashed">
               <p className="text-muted-foreground">
                 현재 예약 가능한 일정이 없습니다.
               </p>
@@ -176,7 +172,8 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </CardContent>
       </Card>
 
-      {selectedSlot && (
+      {/* Guest Count Selection */}
+      {selectedSession && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -189,7 +186,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
               <div>
                 <p className="font-medium text-foreground">예약 인원</p>
                 <p className="text-sm text-muted-foreground">
-                  남은 좌석 {availableSeats}석
+                  최대 {availableSeats}명까지 선택 가능
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -220,8 +217,9 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </Card>
       )}
 
-      {selectedSlot && (
-        <Card>
+      {/* Total Price & Submit */}
+      {selectedSession && (
+        <Card className="sticky bottom-4 border-primary/20 shadow-lg md:static">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -232,7 +230,7 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
                   총 {totalPrice.toLocaleString()}원
                 </p>
               </div>
-              <Button size="lg" onClick={() => setShowConfirmDialog(true)} className="px-8">
+              <Button size="lg" onClick={() => setShowConfirmDialog(true)} className="px-8 font-semibold">
                 예약하기
               </Button>
             </div>
@@ -240,43 +238,48 @@ export function BookingContent({ classItem, timeSlots }: BookingContentProps) {
         </Card>
       )}
 
+      {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>예약을 확정할까요?</DialogTitle>
-            <DialogDescription>아래 내용을 확인해주세요.</DialogDescription>
+            <DialogDescription>
+                결제는 현장에서 진행됩니다. 아래 내용을 확인해주세요.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 rounded-lg bg-muted p-4 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">클래스</span>
-              <span className="font-medium text-foreground">{classItem.name}</span>
+              <span className="font-medium text-foreground text-right break-keep pl-4">{classItem.name}</span>
             </div>
-            {selectedSlot && (
+            {selectedSession && (
               <>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">일정</span>
-                  <span className="text-foreground">
-                    {formatDate(selectedSlot.date)} {selectedSlot.startTime}
+                  <span className="text-foreground text-right">
+                    {format(new Date(selectedSession.start_at), "PPP (EEE) p", { locale: ko })}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">인원</span>
                   <span className="text-foreground">{guests}명</span>
                 </div>
-                <div className="flex justify-between border-t border-border pt-3">
-                  <span className="font-medium text-foreground">총 결제</span>
-                  <span className="font-bold text-foreground">
+                <div className="flex justify-between border-t border-border pt-3 mt-2">
+                  <span className="font-medium text-foreground">총 금액 (현장결제)</span>
+                  <span className="font-bold text-foreground text-lg">
                     {totalPrice.toLocaleString()}원
                   </span>
                 </div>
               </>
             )}
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+          <div className="flex justify-end gap-2 mt-2">
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isPending}>
               취소
             </Button>
-            <Button onClick={handleBook}>예약 확정</Button>
+            <Button onClick={handleBook} disabled={isPending}>
+                {isPending ? "처리중..." : "예약 확정"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
