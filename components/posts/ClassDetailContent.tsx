@@ -14,13 +14,30 @@ import {
 } from "@/components/ui/dialog";
 import { Clock, MapPin, Sparkles, Store } from "lucide-react";
 import type { ClassDetail } from "@/types/class";
+import { createClient } from "@/lib/supabase/client"; // Added import
+import { useRouter } from "next/navigation"; // Added import
+import { LoginModal } from "@/components/auth/LoginModal"; // Added import
 
 interface ClassDetailContentProps {
   classItem: ClassDetail;
 }
 
 export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showEnquiryDialog, setShowEnquiryDialog] = useState(false); // Renamed
+  const [showLoginModal, setShowLoginModal] = useState(false); // Added
+  const router = useRouter(); // Added
+
+  const handleBookClick = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    router.push(`/classes/${classItem.id}/book`);
+  };
 
   return (
     <div className="space-y-6">
@@ -117,19 +134,22 @@ export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setShowLoginDialog(true)}
+              onClick={() => setShowEnquiryDialog(true)}
               className="flex-1 md:flex-none"
             >
               문의하기
             </Button>
-            <Link href={`/classes/${classItem.id}/book`}>
-              <Button className="flex-1 md:flex-none">예약하기</Button>
-            </Link>
+            <Button 
+              className="flex-1 md:flex-none"
+              onClick={handleBookClick}
+            >
+              예약하기
+            </Button>
           </div>
         </div>
       </div>
 
-      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+      <Dialog open={showEnquiryDialog} onOpenChange={setShowEnquiryDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>문의하기</DialogTitle>
@@ -138,13 +158,19 @@ export function ClassDetailContent({ classItem }: ClassDetailContentProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowLoginDialog(false)}>
+            <Button variant="outline" onClick={() => setShowEnquiryDialog(false)}>
               닫기
             </Button>
             <Button>확인</Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      <LoginModal 
+        open={showLoginModal} 
+        onOpenChange={setShowLoginModal}
+        description="예약하시려면 로그인이 필요합니다."
+      />
 
       <div className="h-20 md:hidden" />
     </div>
