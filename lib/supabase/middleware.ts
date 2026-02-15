@@ -38,5 +38,15 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Protected routes: /classes/:id/book, /my/*
+  // Using simple string checks or regex for path matching
+  const isProtectedRoute = 
+    request.nextUrl.pathname.match(/^\/classes\/[^/]+\/book$/) || 
+    request.nextUrl.pathname.startsWith('/my/')
+
+  if (isProtectedRoute && !user) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
   return response
 }
