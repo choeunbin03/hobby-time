@@ -1,13 +1,16 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Calendar, Home } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { User } from "@supabase/supabase-js";
 import { LoginButton } from "@/components/auth/LoginButton";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { LoginModal } from "@/components/auth/LoginModal";
+import { createClient } from "@/lib/supabase/client";
 
 // PRD Phase 1 기준 메뉴 구성: 클래스 탐색, 내 예약
 const navItems = [
@@ -21,6 +24,29 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const pathname = usePathname();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const router = useRouter(); // added
+  const supabase = createClient(); // added
+
+  // Listen for auth state changes to refresh server components
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      router.refresh();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase, router]);
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (href === "/my/reservations" && !user) {
+      e.preventDefault();
+      setShowLoginModal(true);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-md border-b border-border/50">
@@ -44,7 +70,11 @@ export function Header({ user }: HeaderProps) {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
-              <Link key={item.href} href={item.href}>
+              <Link 
+                key={item.href} 
+                href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
+              >
                 <Button
                   variant="ghost"
                   size="sm"
@@ -78,6 +108,7 @@ export function Header({ user }: HeaderProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-0.5 py-3 text-[10px] font-medium transition-colors",
                 isActive
@@ -91,6 +122,11 @@ export function Header({ user }: HeaderProps) {
           );
         })}
       </nav>
+      <LoginModal 
+        open={showLoginModal} 
+        onOpenChange={setShowLoginModal}
+        description="예약 내역을 확인하시려면 로그인이 필요합니다."
+      />
     </header>
   );
 }
