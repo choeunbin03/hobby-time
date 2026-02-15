@@ -1,9 +1,12 @@
 "use client";
 
+import { toast } from "sonner";
+import { cancelReservation } from "@/app/actions/booking";
+import { useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, Clock, AlertCircle } from "lucide-react";
+import { MapPin, Users, Clock } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -14,33 +17,41 @@ interface ReservationListProps {
 }
 
 export function ReservationList({ reservations }: ReservationListProps) {
+  const [isPending, startTransition] = useTransition();
+
   if (reservations.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-          <Calendar className="h-10 w-10 text-muted-foreground" />
-        </div>
-        <h2 className="mt-6 text-xl font-semibold text-foreground">
-          예약된 클래스가 없습니다
-        </h2>
-        <p className="mt-2 max-w-sm text-muted-foreground">
-          새로운 취미를 찾아보세요! 다양한 클래스가 기다리고 있습니다.
-        </p>
-        <Button className="mt-8" asChild>
-          <Link href="/">클래스 둘러보기</Link>
+      <Card className="p-8 text-center">
+        <p className="text-muted-foreground">예약 내역이 없습니다.</p>
+        <Button asChild className="mt-4">
+          <Link href="/classes">클래스 둘러보기</Link>
         </Button>
-      </div>
+      </Card>
     );
   }
+
+  const handleCancel = async (reservationId: string) => {
+    const confirmed = window.confirm("정말로 예약을 취소하시겠습니까?");
+    if (!confirmed) return;
+
+    startTransition(async () => {
+        const result = await cancelReservation(reservationId);
+        if (result.success) {
+            toast.success(result.message);
+        } else {
+            toast.error(result.message);
+        }
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "CONFIRMED":
-        return <Badge className="bg-success text-success-foreground">확정됨</Badge>;
+        return <Badge variant="default">예약 확정</Badge>;
       case "CANCELLED":
         return <Badge variant="destructive">취소됨</Badge>;
       case "COMPLETED":
-        return <Badge variant="secondary">이용완료</Badge>;
+        return <Badge variant="secondary">이용 완료</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -52,11 +63,19 @@ export function ReservationList({ reservations }: ReservationListProps) {
         const session = reservation.class_sessions;
         const classItem = session?.classes;
         const studio = classItem?.studios;
+        const isCancelled = reservation.status === "CANCELLED";
+        const isCancellable = reservation.status === "CONFIRMED";
 
         if (!session || !classItem) return null;
 
         return (
-          <Card key={reservation.id} className="overflow-hidden transition-all hover:border-primary/50">
+          <Card 
+            key={reservation.id} 
+            className={`overflow-hidden transition-all hover:border-primary/50 ${
+                isCancelled ? "opacity-60 bg-muted/50 grayscale" : ""
+            }`}
+          >
+            {/* ... (Header) */}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 bg-muted/30 pb-3 pt-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-muted-foreground">
@@ -68,6 +87,7 @@ export function ReservationList({ reservations }: ReservationListProps) {
               </div>
               {getStatusBadge(reservation.status)}
             </CardHeader>
+
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
                 <div className="space-y-3">
@@ -108,7 +128,16 @@ export function ReservationList({ reservations }: ReservationListProps) {
                             클래스 상세
                         </Link>
                     </Button>
-                    {/* Future Feature: Cancel Button */}
+                    {isCancellable && (
+                        <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            disabled={isPending}
+                            onClick={() => handleCancel(reservation.id)}
+                        >
+                            {isPending ? "취소 중..." : "예약 취소"}
+                        </Button>
+                    )}
                   </div>
                 </div>
               </div>

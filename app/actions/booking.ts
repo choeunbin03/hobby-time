@@ -46,6 +46,34 @@ export async function reserveClass(prevState: any, formData: FormData) {
       return { message: "알 수 없는 오류가 발생했습니다." };
   }
 
-  // Redirect on success (outside try-catch to avoid next.js redirect error being caught)
-  redirect("/my/reservations");
+
+  // Return success instead of redirecting, so client can show Toast
+  return { success: true, message: "예약이 확정되었습니다!" };
+}
+
+export async function cancelReservation(reservationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "로그인이 필요합니다." };
+  }
+
+  try {
+    const { error } = await supabase.rpc("cancel_reservation", {
+      p_reservation_id: reservationId,
+      p_user_id: user.id
+    });
+
+    if (error) {
+      console.error("Cancellation Error:", error);
+      return { success: false, message: error.message || "예약 취소에 실패했습니다." };
+    }
+
+    revalidatePath("/my/reservations");
+    return { success: true, message: "예약이 정상적으로 취소되었습니다." };
+  } catch (error) {
+    console.error("Cancel Action Error:", error);
+    return { success: false, message: "처리 중 오류가 발생했습니다." };
+  }
 }

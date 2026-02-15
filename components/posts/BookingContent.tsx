@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Minus, Plus, Users, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, Clock, Minus, Plus, Users, AlertCircle } from "lucide-react";
 import type { ClassDetail, Session } from "@/types/class";
 import { cn } from "@/lib/utils/cn";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { reserveClass } from "@/app/actions/booking";
+import { toast } from "sonner";
 
 interface BookingContentProps {
   classItem: ClassDetail;
@@ -24,11 +26,11 @@ interface BookingContentProps {
 }
 
 export function BookingContent({ classItem, sessions }: BookingContentProps) {
+  const router = useRouter();
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [guests, setGuests] = useState(1);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Group sessions by Date (YYYY-MM-DD)
   const sessionsByDate = useMemo(() => {
@@ -51,7 +53,11 @@ export function BookingContent({ classItem, sessions }: BookingContentProps) {
 
   const handleBook = async () => {
     if (!selectedSession) return;
-    setErrorMsg(null);
+
+    if (guests > availableSeats) {
+        toast.error("선택한 인원이 잔여석을 초과했습니다.");
+        return;
+    }
 
     const formData = new FormData();
     formData.append("classId", classItem.id);
@@ -61,11 +67,13 @@ export function BookingContent({ classItem, sessions }: BookingContentProps) {
     startTransition(async () => {
         const result = await reserveClass(null, formData);
         
-        // If result contains message (error or success handled by redirect), show it
-        // Note: Success redirect happens in server action, so if we are here, it might be error or just fall through
-        if (result?.message) {
-            setErrorMsg(result.message);
-            setShowConfirmDialog(false); // Close dialog to show error
+        if (result?.success) {
+            toast.success(result.message);
+            setShowConfirmDialog(false);
+            router.push("/my/reservations");
+        } else if (result?.message) {
+            toast.error(result.message);
+            setShowConfirmDialog(false);
         }
     });
   };
@@ -83,14 +91,6 @@ export function BookingContent({ classItem, sessions }: BookingContentProps) {
           </p>
         </CardContent>
       </Card>
-
-      {/* Error Message */}
-      {errorMsg && (
-          <div className="rounded-md bg-destructive/10 p-4 text-destructive flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
-              <span>{errorMsg}</span>
-          </div>
-      )}
 
       {/* Session Selection */}
       <Card>
