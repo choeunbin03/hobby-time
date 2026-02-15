@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { LoginButton } from '@/components/auth/LoginButton'
 import { UserMenu } from '@/components/auth/UserMenu'
+import { MyReservationsLink } from './MyReservationsLink'
 
 export async function Header() {
   const supabase = await createClient()
@@ -23,6 +24,7 @@ export async function Header() {
             <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground/60">
               클래스 탐색
             </Link>
+            <MyReservationsLink user={user} />
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
